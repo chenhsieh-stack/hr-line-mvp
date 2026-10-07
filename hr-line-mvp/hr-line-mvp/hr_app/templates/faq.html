@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon %}
+{% block title %}常見問題 · HR 員工服務中心{% endblock %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">HELP & INFORMATION</span><h1>常見問題</h1><p>從日常問題開始，找到下一步。公司個別制度請以最新核定公告為準。</p></div>
+<form class="search-panel" method="get" action="{{ url_for('faq') }}"><label class="sr-only" for="faq-query">關鍵字</label><div class="search-input">{{ icon('search') }}<input id="faq-query" type="search" name="q" value="{{ query }}" maxlength="120" placeholder="搜尋關鍵字，例如：請假、特休、薪資"></div><input type="hidden" name="category" value="{{ category }}"><button class="button dark" type="submit">搜尋</button></form>
+<nav class="filter-tabs" aria-label="問題分類">{% for value in ('', '人事問題', '薪資福利', '制度查詢') %}<a href="{{ url_for('faq',category=value,q=query) }}" class="{{ 'selected' if category == value else '' }}">{{ value or '全部問題' }}</a>{% endfor %}</nav>
+<div class="results-heading"><span>{{ faqs|length }} 則問題{% if query %} ·「{{ query }}」{% endif %}</span>{% if query %}<a href="{{ url_for('faq',category=category) }}" class="inline-link">清除搜尋</a>{% endif %}</div>
+<div class="faq-list">{% for item in faqs %}<details class="faq-item" {% if query %}open{% endif %}><summary><span class="faq-category">{{ item.category }}</span><span>{{ item.question }}</span><span class="details-plus">+</span></summary><div class="faq-answer"><p>{{ item.answer }}</p><a class="inline-link" href="{{ url_for('case_form',kind='human') }}">需要進一步協助？聯絡真人HR {{ icon('arrow') }}</a></div></details>{% else %}<div class="empty-state">{{ icon('search') }}<h2>目前找不到符合的問題</h2><p>試試較短的關鍵字，或交由真人HR 協助。</p><a class="button dark" href="{{ url_for('case_form',kind='human') }}">聯絡真人HR</a></div>{% endfor %}</div>
+<p class="muted small">這份 FAQ 使用固定示範資料，正式上線前將由 HR 更新為公司核定內容。</p>
+{% endblock %}

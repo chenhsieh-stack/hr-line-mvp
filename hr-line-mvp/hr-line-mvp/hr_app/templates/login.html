@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon, csrf with context %}
+{% block title %}HR 登入 · 員工服務中心{% endblock %}
+{% block content %}
+<section class="login-card"><span class="large-icon sage">{{ icon('lock') }}</span><span class="eyebrow">HR WORKSPACE</span><h1>HR 後台登入</h1><p class="muted">受理每一份需求，讓協助持續往前。</p>{% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}<form method="post" action="{{ url_for('login') }}">{{ csrf() }}<div class="field"><label for="username">帳號</label><input id="username" name="username" required autocomplete="username" maxlength="80"></div><div class="field"><label for="password">密碼</label><input id="password" type="password" name="password" required autocomplete="current-password" maxlength="1000"></div><button class="button dark full-width" type="submit">登入後台 {{ icon('arrow') }}</button></form>{% if demo_password %}<div class="login-demo"><strong>本機示範帳號</strong><br>帳號 <code>{{ admin_username }}</code> ／ 密碼 <code>HR-demo-2026!</code><p>此版用於本機測試；開放外部存取前，請先更換密碼與完成員工驗證。</p></div>{% endif %}</section>
+{% endblock %}

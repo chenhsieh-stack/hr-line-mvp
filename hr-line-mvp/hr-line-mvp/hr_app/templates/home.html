@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy"><span class="eyebrow"><span class="tiny-dot"></span> PEOPLE FIRST · 以人為本</span><h1>工作裡的大小事，<br>讓 HR 陪你一起。</h1><p>從人事與福利，到意見與申訴，<br class="desktop-only">在這裡找到需要的資訊，也讓我們聽見你的聲音。</p><a class="button dark" href="{{ url_for('my_cases') }}">{{ icon('folder') }}查看我的案件{{ icon('arrow') }}</a></div>
+  <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-card card-main"><span class="art-symbol">{{ icon('headset') }}</span><span class="art-title">你的聲音，我們在聽。</span><span class="art-sub">HR EMPLOYEE CARE</span><span class="art-line"></span><span class="art-mini"><span class="tiny-dot"></span> 一起，把工作變得更好</span></div><div class="art-float float-top">{{ icon('shield') }}安心表達</div><div class="art-float float-bottom">{{ icon('message') }}有人回應</div><span class="art-plus plus-one">+</span><span class="art-plus plus-two">+</span></div>
+</section>
+<section aria-labelledby="services-title" class="services"><div class="section-heading"><div><span class="eyebrow">HOW CAN WE HELP?</span><h2 id="services-title">今天，需要什麼協助？</h2></div><span class="section-aside">選擇一項服務，從這裡開始。</span></div>
+<div class="service-grid">
+{% for label, symbol, description, href, tone in [
+('人事問題','person','出勤、請假、特休與人事異動',url_for('faq',category='人事問題'),'sage'),
+('薪資福利','wallet','薪資、勞健保與員工福利',url_for('faq',category='薪資福利'),'sand'),
+('制度查詢','book','常見問題與公司制度說明',url_for('faq',category='制度查詢'),'blue'),
+('意見反映','message','分享工作環境與制度建議',url_for('case_form',kind='feedback'),'sand'),
+('安心申訴','shield','敏感事件受理，由 HR 人工處理',url_for('case_form',kind='complaint'),'rose'),
+('真人HR','headset','個人問題，交給 HR 協助確認',url_for('case_form',kind='human'),'sage') ] %}
+<a class="service-card" href="{{ href }}"><span class="service-icon {{ tone }}">{{ icon(symbol) }}</span><div><h3>{{ label }}{% if label == '安心申訴' %}<span class="mini-label">人工處理</span>{% endif %}</h3><p>{{ description }}</p></div>{{ icon('arrow', 'card-arrow') }}</a>
+{% endfor %}</div></section>
+<section class="home-bottom"><div class="faq-prompt"><span class="service-icon sage">{{ icon('search') }}</span><div><h3>想先找找答案？</h3><p>試試「請假」、「特休」或「薪資」。</p></div><a class="inline-link" href="{{ url_for('faq') }}">搜尋常見問題 {{ icon('arrow') }}</a></div><div class="care-note">{{ icon('shield') }}<p><strong>安心申訴，由人來聆聽與處理。</strong><br>系統僅協助收件與追蹤，不會自動判定事件是否成立。</p></div></section>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon, badge %}
+{% block title %}送出完成 · HR 員工服務中心{% endblock %}
+{% block content %}
+<section class="receipt-card"><span class="receipt-check">{{ icon('check') }}</span><span class="eyebrow">YOUR VOICE HAS BEEN RECEIVED</span><h1>案件已成功送出</h1><p>謝謝你願意分享。<br>HR 將依公司程序人工受理並跟進。</p><div class="receipt-number"><span>請保留你的案件編號</span><strong id="case-number">{{ receipt.number }}</strong><button class="text-button" id="copy-number" type="button">複製案件編號</button><span class="sr-only" id="copy-status" role="status"></span></div><div class="receipt-meta"><span>{{ kinds[receipt.kind] }}</span>{{ badge('新案件') }}{% if receipt.sensitive %}<span class="manual-label">人工處理</span>{% endif %}</div><p class="muted small">此頁為收件確認；最新處理狀態請至「我的案件」查看。</p><div class="center-actions"><a class="button dark" href="{{ url_for('my_cases') }}">查看我的案件 {{ icon('arrow') }}</a><a class="button secondary" href="{{ url_for('home') }}">返回首頁</a></div></section>
+{% endblock %}

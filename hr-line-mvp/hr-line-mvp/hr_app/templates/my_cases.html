@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon, csrf, badge with context %}
+{% block title %}我的案件 · HR 員工服務中心{% endblock %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">FOLLOW YOUR REQUEST</span><h1>我的案件</h1><p>輸入送件時使用的員工編號，查看案件的最新狀態。</p></div>
+<div class="alert info">本機測試：員工編號尚未完成身分驗證，此頁僅顯示案件狀態。請使用測試資料。</div>
+<form class="search-panel" method="post" action="{{ url_for('my_cases') }}">{{ csrf() }}<label class="sr-only" for="employee_id">員工編號</label><div class="search-input">{{ icon('person') }}<input id="employee_id" name="employee_id" maxlength="40" value="{{ employee_id }}" placeholder="輸入員工編號，例如：E001" required autocomplete="off" {% if error %}aria-invalid="true"{% endif %}></div><button class="button dark" type="submit">查詢案件</button></form>
+{% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
+{% if cases is not none %}<div class="results-heading"><span>共 {{ cases|length }} 件案件</span><span class="small muted">時間以台灣時區顯示</span></div><div class="case-list">{% for case in cases %}<article class="employee-case"><span class="service-icon {{ 'rose' if case.sensitive else 'sage' }}">{{ icon('shield' if case.sensitive else 'folder') }}</span><div class="employee-case-content"><span class="case-number">{{ case.case_number }}</span><h2>{{ kinds[case.kind] }}{% if case.sensitive %}<span class="manual-label">人工處理</span>{% endif %}</h2><p>送件：{{ case.created_at|display_time }}<span>更新：{{ case.updated_at|display_time }}</span></p></div>{{ badge(case.status) }}</article>{% else %}<div class="empty-state">{{ icon('folder') }}<h2>目前沒有查到案件</h2><p>請確認員工編號，或先從首頁提出需求。</p><a class="button secondary" href="{{ url_for('home') }}">前往服務首頁</a></div>{% endfor %}</div>
+{% else %}<div class="empty-state initial-state">{{ icon('folder') }}<h2>讓每一步進度，都清楚可見。</h2><p>送出案件後，可在這裡追蹤人工處理進度。</p></div>{% endif %}
+<div class="status-guide">{% for status in statuses %}<span>{{ badge(status) }}</span>{% if not loop.last %}<span class="guide-arrow">→</span>{% endif %}{% endfor %}</div>
+{% endblock %}
