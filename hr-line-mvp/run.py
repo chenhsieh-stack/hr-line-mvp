@@ -3,10 +3,12 @@ import os
 import sys
 from pathlib import Path
 
-# 強制將 run.py 所在的專案根目錄加入 Python 模組搜尋路徑
 BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
+
+from hr_app import create_app
+from waitress import serve
 
 
 def load_env(path):
@@ -21,13 +23,11 @@ def load_env(path):
             os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
+app = create_app()
+
 if __name__ == "__main__":
     load_env(BASE_DIR / ".env")
-    from hr_app import create_app
-    from waitress import serve
 
-    app = create_app()
-    # 在 Render 上 host 必須監聽 0.0.0.0，port 預設為 10000（可由環境變數讀取）
     host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "10000"))
 
