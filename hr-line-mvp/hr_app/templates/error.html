@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} · HR 員工服務中心{% endblock %}
+{% block content %}<div class="empty-state error-page"><span class="eyebrow">{{ code }}</span><h1>{{ message }}</h1><p>可返回首頁，重新開啟需要的服務。</p><a class="button dark" href="{{ url_for('home') }}">返回首頁</a></div>{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import icon, csrf, field_error with context %}
+{% block title %}{{ kinds[kind] }} · HR 員工服務中心{% endblock %}
+{% block main_class %}form-page{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('home') }}">← 返回服務首頁</a>
+<div class="page-heading"><span class="eyebrow">{{ 'A SAFE SPACE TO SPEAK' if kind == 'complaint' else 'WE ARE HERE TO HELP' }}</span><h1>{{ kinds[kind] }}</h1><p>{{ '請依實際情況描述事件，讓 HR 了解並提供協助。' if kind == 'complaint' else '寫下你的需求，我們會將案件交由 HR 人員處理。' }}</p></div>
+<div class="form-layout"><aside class="form-aside"><span class="large-icon {{ 'rose' if kind == 'complaint' else 'sage' }}">{{ icon('shield' if kind == 'complaint' else 'message') }}</span><h2>{{ '安心表達，人工受理。' if kind == 'complaint' else '每一份聲音，都值得被聽見。' }}</h2><p>送出後會產生案件編號，<br>你可隨時查看處理狀態。</p><ol class="steps"><li><span>01</span>填寫資料</li><li><span>02</span>HR 人工受理</li><li><span>03</span>追蹤案件進度</li></ol>{% if kind == 'complaint' %}<div class="aside-note">系統不會判定事件是否成立。如有立即人身安全疑慮，請優先尋求現場緊急協助。<br><br>有佐證資料時，先保留原始資料，待 HR 提供指定管道後提交。</div>{% endif %}</aside>
+<form class="form-card" action="{{ url_for('case_form',kind=kind) }}" method="post">{{ csrf() }}<input type="hidden" name="submission_token" value="{{ submission_token }}">
+{% if errors %}<div class="alert error" role="alert"><strong>請確認以下欄位後再送出。</strong><ul>{% for key, message in errors.items() %}<li><a href="#{{ key }}">{{ message }}</a></li>{% endfor %}</ul></div>{% endif %}
+<div class="form-section-title"><span>01</span><h2>基本資料</h2><small>＊為必填</small></div>
+<div class="two-columns">
+{% for field, label, maxlen, placeholder in [('name','姓名',60,'請填寫姓名'),('employee_id','員工編號',40,'例如：E001')] %}<div class="field"><label for="{{ field }}">{{ label }} <span class="required">＊</span></label><input id="{{ field }}" name="{{ field }}" value="{{ values.get(field,'') }}" maxlength="{{ maxlen }}" placeholder="{{ placeholder }}" required {% if errors.get(field) %}aria-invalid="true" aria-describedby="error-{{ field }}"{% endif %} autocomplete="{{ 'name' if field == 'name' else 'off' }}">{{ field_error(field,errors) }}</div>{% endfor %}
+</div>
+<div class="field"><label for="organization">品牌／單位／門市 <span class="required">＊</span></label><input id="organization" name="organization" value="{{ values.get('organization','') }}" maxlength="120" placeholder="例如：路易莎／營運部／台北示範門市" required>{{ field_error('organization',errors) }}</div>
+<div class="form-section-title"><span>02</span><h2>{{ '事件資訊' if kind == 'complaint' else '需求內容' }}</h2></div>
+<div class="field"><label for="category">{{ '事件類型' if kind == 'complaint' else '問題分類' }} <span class="required">＊</span></label><select id="category" name="category" required><option value="">請選擇分類</option>{% for option in form_categories %}<option value="{{ option }}" {{ 'selected' if values.get('category') == option else '' }}>{{ option }}</option>{% endfor %}</select>{{ field_error('category',errors) }}</div>
+<div class="field"><label for="title">主旨 <span class="required">＊</span></label><input id="title" name="title" value="{{ values.get('title','') }}" maxlength="120" placeholder="用一句話說明你想反映的事情" required>{{ field_error('title',errors) }}</div>
+{% if kind == 'complaint' %}
+<div class="field"><label for="event_time">事件時間 <span class="required">＊</span></label><input id="event_time" type="datetime-local" name="event_time" value="{{ values.get('event_time','') }}" required><p class="field-help">以台灣時間填寫；若為約略時間，請在事件經過中補充。</p>{{ field_error('event_time',errors) }}</div>
+<div class="field"><label for="location">事件地點 <span class="required">＊</span></label><input id="location" name="location" value="{{ values.get('location','') }}" maxlength="200" placeholder="門市、辦公室或其他地點" required>{{ field_error('location',errors) }}</div>
+<div class="field"><label for="people">涉及人員 <span class="required">＊</span></label><input id="people" name="people" value="{{ values.get('people','') }}" maxlength="300" placeholder="姓名、職稱或可辨識資訊；不清楚可填「不詳」" required>{{ field_error('people',errors) }}</div>
+{% endif %}
+<div class="field"><label for="description">{{ '事件經過' if kind == 'complaint' else '詳細內容' }} <span class="required">＊</span></label><textarea id="description" name="description" rows="7" maxlength="6000" placeholder="{{ '請描述事件經過、時間順序，以及希望 HR 協助的事項。' if kind == 'complaint' else '請說明狀況、遇到的問題或希望 HR 協助的事項。' }}" required>{{ values.get('description','') }}</textarea><p class="field-help">最多 6,000 字。請勿填寫密碼、完整金融帳號或無關的個人資料。</p>{{ field_error('description',errors) }}</div>
+{% if kind == 'complaint' %}<div class="field"><label for="evidence">是否有佐證資料 <span class="required">＊</span></label><select id="evidence" name="evidence" required><option value="">請選擇</option>{% for option in ('有','無','尚不確定') %}<option {{ 'selected' if values.get('evidence') == option else '' }}>{{ option }}</option>{% endfor %}</select>{{ field_error('evidence',errors) }}</div><div class="field"><label for="evidence_note">佐證資料說明 <span class="optional">選填</span></label><textarea id="evidence_note" name="evidence_note" rows="3" maxlength="1000" placeholder="例如：訊息截圖、出勤紀錄或目擊者資訊。此版不提供檔案上傳。">{{ values.get('evidence_note','') }}</textarea>{{ field_error('evidence_note',errors) }}</div>{% endif %}
+<div class="consent-box"><label for="consent"><input id="consent" type="checkbox" name="consent" value="yes" required {{ 'checked' if request.form.get('consent') == 'yes' else '' }}><span>我了解資料將供 HR 受理、處理及後續聯繫。本機版僅供測試，請勿提交真實敏感個資。</span></label>{{ field_error('consent',errors) }}</div>
+<div class="form-actions"><a class="button secondary" href="{{ url_for('home') }}">返回首頁</a><button class="button dark" type="submit" data-submit>送出案件 {{ icon('arrow') }}</button></div>
+</form></div>
+{% endblock %}
