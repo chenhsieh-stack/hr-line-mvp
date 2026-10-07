@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 
+# ⚠️ 必須放在最外層（Top-level）：讓檔案被載入時，第一時間將專案根目錄加入搜尋路徑
 BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
@@ -28,6 +29,7 @@ app = create_app()
 if __name__ == "__main__":
     load_env(BASE_DIR / ".env")
 
+    # Render 上 host 必須設為 0.0.0.0，port 預設讀取環境變數 PORT (預設 10000)
     host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "10000"))
 
