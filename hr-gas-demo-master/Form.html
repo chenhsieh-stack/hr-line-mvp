@@ -1,0 +1,335 @@
+<?
+var kind = params.kind || 'feedback';
+var kindLabels = {feedback: '意見反映', complaint: '安心申訴', human: '真人HR'};
+var kindLabel = kindLabels[kind] || '意見反映';
+var isComplaint = (kind === 'complaint');
+var isHuman = (kind === 'human');
+var isFeedback = (kind === 'feedback');
+var iconName = isComplaint ? 'shield' : (isHuman ? 'headset' : 'message');
+var iconColors = {feedback: 'sand', complaint: 'rose', human: 'blue'};
+var iconColor = iconColors[kind] || 'sand';
+
+var allCategories = ['人事問題', '薪資福利', '出勤與請假', '制度查詢', '工作環境', '管理建議', '職場霸凌', '性騷擾', '不法侵害', '其他敏感事件', '其他'];
+var sensitiveCategories = ['職場霸凌', '性騷擾', '不法侵害', '其他敏感事件'];
+?>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= kindLabel ?> — HR 員工服務中心</title>
+  <?!= include('Style') ?>
+</head>
+<body>
+<a href="#main" class="skip-link">跳至主要內容</a>
+<header>
+  <div class="header">
+    <a class="brand" href="<?= baseUrl ?>?page=home">
+      <div class="brand-logo" style="background:var(--green);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><text x="22" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="sans-serif">路易莎</text></svg>
+      </div>
+      <div class="brand-name">HR 員工服務中心<small>LOUISA COFFEE · PEOPLE</small></div>
+    </a>
+    <nav class="desktop-nav" aria-label="主導覽">
+      <a href="<?= baseUrl ?>?page=home" data-page="home">首頁</a>
+      <a href="<?= baseUrl ?>?page=faq" data-page="faq">常見問題</a>
+      <a href="<?= baseUrl ?>?page=form&kind=feedback" data-page="form">意見反映</a>
+      <a href="<?= baseUrl ?>?page=form&kind=complaint" data-page="form-complaint">安心申訴</a>
+      <a href="<?= baseUrl ?>?page=form&kind=human" data-page="form-human">真人HR</a>
+      <a href="<?= baseUrl ?>?page=my-cases" data-page="my-cases">我的案件</a>
+    </nav>
+    <div class="header-actions">
+      <span class="local-tag">GAS Demo</span>
+      <a class="admin-link" href="<?= baseUrl ?>?page=login">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="12" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></svg>
+        後台
+      </a>
+    </div>
+  </div>
+</header>
+<main id="main" class="main">
+
+  <a href="<?= baseUrl ?>?page=home" class="back-link">← 返回首頁</a>
+
+  <div class="page-heading">
+    <h1><?= kindLabel ?></h1>
+    <p>
+      <? if(isComplaint){ ?>涉及職場霸凌、性騷擾或不法侵害等敏感事件，請填寫安心申訴表單，由 HR 人工受理。
+      <? } else if(isHuman){ ?>薪資疑問、人事異動或複雜個案，請填寫表單讓 HR 專人為您處理。
+      <? } else { ?>工作環境、管理方式或制度上的意見與建議，請填寫下方表單。
+      <? } ?>
+    </p>
+  </div>
+
+  <div id="alertArea"></div>
+
+  <div class="form-layout">
+    <!-- Aside -->
+    <aside class="form-aside">
+      <div class="large-icon <?= iconColor ?>">
+        <? if(isComplaint){ ?>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 8 4v6c0 5-5 8-8 10-3-2-8-5-8-10V6Z"/><path d="m8 12 3 3 5-6"/></svg>
+        <? } else if(isHuman){ ?>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14v-3a8 8 0 0 1 16 0v6c0 3-2 4-5 4"/><rect x="2" y="11" width="4" height="7" rx="2"/><rect x="18" y="11" width="4" height="7" rx="2"/><path d="M12 21h3"/></svg>
+        <? } else { ?>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-9 9 10 10 0 0 1-4-1l-5 1 1-5a10 10 0 0 1-1-4 9 9 0 0 1 18 0Z"/><path d="M8 9h8M8 13h5"/></svg>
+        <? } ?>
+      </div>
+      <h2><?= kindLabel ?></h2>
+      <p>
+        <? if(isComplaint){ ?>填寫後系統會產生案件編號，由 HR 人工受理並聯繫您。系統不判定事件是否成立。
+        <? } else if(isHuman){ ?>HR 收到案件後將在 2 個工作天內與您聯繫，請確認聯絡資訊正確。
+        <? } else { ?>您的意見將由 HR 彙整評估，感謝您協助改善工作環境。
+        <? } ?>
+      </p>
+      <ol class="steps">
+        <li><span>1</span> 填寫基本資料</li>
+        <li><span>2</span> 說明案件內容</li>
+        <li><span>3</span> 確認送出，取得案件編號</li>
+      </ol>
+      <p class="aside-note">
+        <? if(isComplaint){ ?>安心申訴資料僅供 HR 人工處理，不對外公開。如有立即人身安全疑慮，請優先尋求現場緊急協助。
+        <? } else { ?>填寫的個人資料僅用於本次案件處理，不作其他用途。
+        <? } ?>
+      </p>
+    </aside>
+
+    <!-- Form card -->
+    <div class="form-card">
+      <? if(isComplaint){ ?>
+      <div class="alert sensitive" role="alert">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;width:20px;height:20px;"><path d="m12 2 8 4v6c0 5-5 8-8 10-3-2-8-5-8-10V6Z"/><path d="m8 12 3 3 5-6"/></svg>
+        <span>本表單供安心申訴使用，所有資料由 HR 人工保密受理。如有立即人身安全疑慮，請先撥打 110 或聯絡現場緊急聯絡人。</span>
+      </div>
+      <? } ?>
+
+      <div class="form-section-title">
+        <span>01</span>
+        <h2>基本資料</h2>
+        <small>帶 <span class="required">*</span> 為必填</small>
+      </div>
+
+      <div class="two-columns">
+        <div class="field">
+          <label for="employeeId">員工編號<span class="required">*</span></label>
+          <input type="text" id="employeeId" name="employeeId" placeholder="例：E001" required>
+        </div>
+        <div class="field">
+          <label for="name">姓名<span class="required">*</span></label>
+          <input type="text" id="name" name="name" placeholder="真實姓名" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="organization">品牌／單位／門市<span class="required">*</span></label>
+        <input type="text" id="organization" name="organization" placeholder="例：路易莎 信義門市" required>
+      </div>
+
+      <div class="form-section-title" style="margin-top:28px;">
+        <span>02</span>
+        <h2>案件內容</h2>
+      </div>
+
+      <div class="field">
+        <label for="category">類別<span class="required">*</span></label>
+        <select id="category" name="category" required>
+          <option value="">請選擇類別</option>
+          <? for(var i=0;i<allCategories.length;i++){ var cat=allCategories[i]; ?>
+          <option value="<?= cat ?>"><?= cat ?></option>
+          <? } ?>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="title">主旨<span class="required">*</span></label>
+        <input type="text" id="title" name="title" placeholder="簡短描述您的問題或意見" required maxlength="100">
+      </div>
+
+      <div class="field">
+        <label for="description">詳細說明<span class="required">*</span></label>
+        <textarea id="description" name="description" rows="6" placeholder="請盡量詳細描述，包含時間、地點、相關人員等資訊…" required></textarea>
+      </div>
+
+      <!-- Complaint-only fields -->
+      <div id="complaintFields" <?= isComplaint ? '' : 'hidden' ?>>
+        <div class="form-section-title" style="margin-top:28px;">
+          <span>03</span>
+          <h2>事件補充資訊</h2>
+          <small>（可選填）</small>
+        </div>
+
+        <div class="two-columns">
+          <div class="field">
+            <label for="eventTime">事件發生時間<span class="optional">選填</span></label>
+            <input type="datetime-local" id="eventTime" name="eventTime">
+          </div>
+          <div class="field">
+            <label for="location">發生地點<span class="optional">選填</span></label>
+            <input type="text" id="location" name="location" placeholder="例：XX 門市、辦公室">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="people">涉及人員<span class="optional">選填</span></label>
+          <input type="text" id="people" name="people" placeholder="相關人員姓名或職稱（可匿名描述）">
+        </div>
+
+        <div class="field">
+          <label for="evidence">相關佐證<span class="optional">選填</span></label>
+          <select id="evidence" name="evidence">
+            <option value="">請選擇</option>
+            <option value="有文字/通訊紀錄">有文字／通訊紀錄</option>
+            <option value="有影像/錄音">有影像／錄音</option>
+            <option value="有目擊者">有目擊者</option>
+            <option value="無佐證">無佐證</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="evidenceNote">佐證補充說明<span class="optional">選填</span></label>
+          <textarea id="evidenceNote" name="evidenceNote" rows="3" placeholder="如有其他說明，請填寫於此…"></textarea>
+        </div>
+      </div>
+
+      <div class="consent-box">
+        <label>
+          <input type="checkbox" id="consent" required>
+          <span>我同意本系統依據個資保護原則處理上述資料，資料僅用於本次案件處理，不對外公開。</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <a href="<?= baseUrl ?>?page=home" class="button secondary">取消</a>
+        <button type="button" id="submitBtn" class="button dark" onclick="handleSubmit()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+          送出<?= kindLabel ?>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+<footer class="footer">
+  <span><strong>路易莎咖啡</strong> &copy; 2026 HR 員工服務中心</span>
+  <span>本系統資料僅供示範，正式上線前請由 HR 確認內容。</span>
+</footer>
+<nav class="mobile-nav" aria-label="行動導覽">
+  <a href="<?= baseUrl ?>?page=home" data-page="home">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 10 10-8 10 8M5 8v13h14V8M10 21v-7h4v7"/></svg>
+    首頁
+  </a>
+  <a href="<?= baseUrl ?>?page=faq" data-page="faq">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 2-3-2-5-3-9-2Z"/></svg>
+    FAQ
+  </a>
+  <a href="<?= baseUrl ?>?page=my-cases" data-page="my-cases">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h7l2 3h9v12H3Z"/><path d="M3 6V3h7l2 3h8v3"/></svg>
+    我的案件
+  </a>
+</nav>
+<script>
+var BASE_URL = '<?= baseUrl ?>';
+var KIND = '<?= kind ?>';
+var SENSITIVE_CATEGORIES = ['職場霸凌', '性騷擾', '不法侵害', '其他敏感事件'];
+
+(function(){
+  var params = new URLSearchParams(location.search);
+  var pg = params.get('page') || 'home';
+  var kind = params.get('kind') || '';
+  var navKey = pg;
+  if(pg === 'form') {
+    if(kind === 'complaint') navKey = 'form-complaint';
+    else if(kind === 'human') navKey = 'form-human';
+    else navKey = 'form';
+  }
+  document.querySelectorAll('.desktop-nav a, .mobile-nav a').forEach(function(a){
+    a.classList.toggle('active', a.dataset.page === navKey);
+  });
+
+  // Show/hide complaint fields based on category selection
+  var catSel = document.getElementById('category');
+  var complaintFields = document.getElementById('complaintFields');
+  if(catSel && complaintFields){
+    catSel.addEventListener('change', function(){
+      if(KIND === 'complaint'){
+        complaintFields.hidden = false;
+      } else {
+        complaintFields.hidden = SENSITIVE_CATEGORIES.indexOf(catSel.value) < 0;
+      }
+    });
+  }
+})();
+
+function handleSubmit() {
+  var alertArea = document.getElementById('alertArea');
+  alertArea.innerHTML = '';
+
+  // Validate
+  var errors = [];
+  var empId = document.getElementById('employeeId').value.trim();
+  var name = document.getElementById('name').value.trim();
+  var org = document.getElementById('organization').value.trim();
+  var cat = document.getElementById('category').value;
+  var title = document.getElementById('title').value.trim();
+  var desc = document.getElementById('description').value.trim();
+  var consent = document.getElementById('consent').checked;
+
+  if(!empId) errors.push('請填寫員工編號');
+  if(!name) errors.push('請填寫姓名');
+  if(!org) errors.push('請填寫品牌／單位／門市');
+  if(!cat) errors.push('請選擇類別');
+  if(!title) errors.push('請填寫主旨');
+  if(!desc) errors.push('請填寫詳細說明');
+  if(!consent) errors.push('請勾選同意個資使用條款');
+
+  if(errors.length > 0){
+    alertArea.innerHTML = '<div class="alert error" role="alert"><ul>' +
+      errors.map(function(e){ return '<li>' + e + '</li>'; }).join('') +
+      '</ul></div>';
+    alertArea.scrollIntoView({behavior:'smooth', block:'nearest'});
+    return;
+  }
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '送出中…';
+
+  var data = {
+    kind: KIND,
+    employeeId: empId,
+    name: name,
+    organization: org,
+    category: cat,
+    title: title,
+    description: desc,
+    eventTime: (document.getElementById('eventTime') || {}).value || '',
+    location: (document.getElementById('location') || {}).value || '',
+    people: (document.getElementById('people') || {}).value || '',
+    evidence: (document.getElementById('evidence') || {}).value || '',
+    evidenceNote: (document.getElementById('evidenceNote') || {}).value || ''
+  };
+
+  google.script.run
+    .withSuccessHandler(function(result){
+      if(result.ok){
+        var url = BASE_URL + '?page=receipt&number=' + encodeURIComponent(result.caseNumber) +
+          '&kind=' + encodeURIComponent(result.kind) +
+          '&sensitive=' + encodeURIComponent(result.sensitive);
+        window.location.href = url;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '送出' + (KIND === 'feedback' ? '意見反映' : KIND === 'complaint' ? '安心申訴' : '真人HR');
+        alertArea.innerHTML = '<div class="alert error" role="alert">送出失敗：' + (result.error || '請稍後再試') + '</div>';
+      }
+    })
+    .withFailureHandler(function(err){
+      btn.disabled = false;
+      btn.innerHTML = '送出';
+      alertArea.innerHTML = '<div class="alert error" role="alert">系統錯誤：' + err.message + '</div>';
+    })
+    .submitCase(data);
+}
+</script>
+</body>
+</html>

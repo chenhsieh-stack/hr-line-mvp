@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HR 員工服務中心</title>
+  <?!= include('Style') ?>
+</head>
+<body>
+<a href="#main" class="skip-link">跳至主要內容</a>
+<header>
+  <div class="header">
+    <a class="brand" href="<?= baseUrl ?>?page=home">
+      <div class="brand-logo" style="background:var(--green);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="20" y="27" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="sans-serif">路易莎</text>
+        </svg>
+      </div>
+      <div class="brand-name">HR 員工服務中心<small>LOUISA COFFEE · PEOPLE</small></div>
+    </a>
+    <nav class="desktop-nav" aria-label="主導覽">
+      <a href="<?= baseUrl ?>?page=home" data-page="home">首頁</a>
+      <a href="<?= baseUrl ?>?page=faq" data-page="faq">常見問題</a>
+      <a href="<?= baseUrl ?>?page=form&kind=feedback" data-page="form">意見反映</a>
+      <a href="<?= baseUrl ?>?page=form&kind=complaint" data-page="form-complaint">安心申訴</a>
+      <a href="<?= baseUrl ?>?page=form&kind=human" data-page="form-human">真人HR</a>
+      <a href="<?= baseUrl ?>?page=my-cases" data-page="my-cases">我的案件</a>
+    </nav>
+    <div class="header-actions">
+      <span class="local-tag">GAS Demo</span>
+      <a class="admin-link" href="<?= baseUrl ?>?page=login">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="12" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></svg>
+        後台
+      </a>
+    </div>
+  </div>
+</header>
+<main id="main" class="main">

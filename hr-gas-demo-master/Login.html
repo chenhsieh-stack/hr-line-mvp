@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HR 後台登入 — HR 員工服務中心</title>
+  <?!= include('Style') ?>
+</head>
+<body>
+<a href="#main" class="skip-link">跳至主要內容</a>
+<header>
+  <div class="header">
+    <a class="brand" href="<?= baseUrl ?>?page=home">
+      <div class="brand-logo" style="background:var(--green);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><text x="22" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="sans-serif">路易莎</text></svg>
+      </div>
+      <div class="brand-name">HR 員工服務中心<small>LOUISA COFFEE · PEOPLE</small></div>
+    </a>
+    <div class="header-actions">
+      <span class="local-tag">GAS Demo</span>
+    </div>
+  </div>
+</header>
+<main id="main" class="main">
+
+  <div class="login-card">
+    <div class="large-icon sage">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="12" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></svg>
+    </div>
+    <span class="eyebrow">HR 管理後台</span>
+    <h1>登入</h1>
+    <p>請使用 HR 管理帳號登入後台系統</p>
+
+    <div id="alertArea"></div>
+
+    <div class="field">
+      <label for="username">帳號</label>
+      <input type="text" id="username" name="username" placeholder="HR 帳號" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="password">密碼</label>
+      <input type="password" id="password" name="password" placeholder="••••••••••" autocomplete="current-password">
+    </div>
+
+    <button type="button" class="button dark full-width" id="loginBtn" onclick="handleLogin()">
+      登入後台
+    </button>
+
+    <div class="login-demo">
+      <strong>Demo 帳號</strong>
+      <p>帳號：<code>hr</code></p>
+      <p>密碼：<code>HR-demo-2026!</code></p>
+    </div>
+  </div>
+
+</main>
+<footer class="footer">
+  <span><strong>路易莎咖啡</strong> &copy; 2026 HR 員工服務中心</span>
+  <span>本系統資料僅供示範，正式上線前請由 HR 確認內容。</span>
+</footer>
+<script>
+var BASE_URL = '<?= baseUrl ?>';
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter') handleLogin();
+});
+
+function handleLogin(){
+  var alertArea = document.getElementById('alertArea');
+  alertArea.innerHTML = '';
+  var username = document.getElementById('username').value.trim();
+  var password = document.getElementById('password').value;
+  var btn = document.getElementById('loginBtn');
+
+  if(!username || !password){
+    alertArea.innerHTML = '<div class="alert error" role="alert">請填寫帳號與密碼</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '登入中…';
+
+  google.script.run
+    .withSuccessHandler(function(result){
+      if(result.ok){
+        sessionStorage.setItem('adminToken', result.token);
+        window.location.href = BASE_URL + '?page=admin';
+      } else {
+        btn.disabled = false;
+        btn.textContent = '登入後台';
+        alertArea.innerHTML = '<div class="alert error" role="alert">' + (result.error || '帳號或密碼錯誤') + '</div>';
+      }
+    })
+    .withFailureHandler(function(err){
+      btn.disabled = false;
+      btn.textContent = '登入後台';
+      alertArea.innerHTML = '<div class="alert error" role="alert">系統錯誤：' + err.message + '</div>';
+    })
+    .adminLogin(username, password);
+}
+</script>
+</body>
+</html>

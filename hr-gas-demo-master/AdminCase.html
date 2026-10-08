@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案件詳情 — HR 後台</title>
+  <?!= include('Style') ?>
+</head>
+<body>
+<a href="#main" class="skip-link">跳至主要內容</a>
+<header>
+  <div class="header">
+    <a class="brand" href="<?= baseUrl ?>?page=home">
+      <div class="brand-logo" style="background:var(--green);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><text x="22" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="sans-serif">路易莎</text></svg>
+      </div>
+      <div class="brand-name">HR 員工服務中心<small>LOUISA COFFEE · PEOPLE</small></div>
+    </a>
+    <nav class="desktop-nav" aria-label="主導覽">
+      <a href="<?= baseUrl ?>?page=admin" data-page="admin" class="active">案件管理</a>
+    </nav>
+    <div class="header-actions">
+      <span class="local-tag">HR 後台</span>
+      <button class="text-button" onclick="handleLogout()" style="margin-right:4px;">登出</button>
+      <a href="<?= baseUrl ?>?page=home" class="admin-link">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 10 10-8 10 8M5 8v13h14V8M10 21v-7h4v7"/></svg>
+        員工端
+      </a>
+    </div>
+  </div>
+</header>
+<main id="main" class="main admin-page">
+
+  <a href="<?= baseUrl ?>?page=admin" class="back-link">← 返回案件列表</a>
+
+  <div class="page-heading" id="pageHeading" style="padding-top:22px;">
+    <div class="detail-heading-meta" id="headingMeta">
+      <span style="color:var(--muted);font-size:13px;">載入中…</span>
+    </div>
+    <h1 id="pageTitle" style="font-size:26px;margin-top:10px;">案件詳情</h1>
+  </div>
+
+  <div id="alertArea"></div>
+
+  <div class="detail-layout" id="detailLayout" hidden>
+    <!-- Main content -->
+    <div>
+      <div class="panel" id="caseInfoPanel">
+        <h2>案件資訊</h2>
+        <dl class="details-grid" id="detailsGrid"></dl>
+        <div class="detail-text" id="detailDesc"></div>
+        <div class="detail-text" id="complaintExtra" hidden></div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="panel">
+        <h2>處理歷程</h2>
+        <ul class="timeline" id="timelineList"></ul>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside>
+      <div class="panel handling-panel">
+        <h2>處理操作</h2>
+
+        <div class="field">
+          <label for="updateStatus">更新狀態</label>
+          <select id="updateStatus">
+            <option>新案件</option>
+            <option>處理中</option>
+            <option>待員工回覆</option>
+            <option>已結案</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="updateAssignee">負責人員<span class="optional">選填</span></label>
+          <input type="text" id="updateAssignee" placeholder="HR 負責人員姓名">
+        </div>
+
+        <div class="field">
+          <label for="updateCategory">類別調整<span class="optional">選填</span></label>
+          <select id="updateCategory">
+            <option value="">不調整</option>
+            <option>人事問題</option>
+            <option>薪資福利</option>
+            <option>出勤與請假</option>
+            <option>制度查詢</option>
+            <option>工作環境</option>
+            <option>管理建議</option>
+            <option>職場霸凌</option>
+            <option>性騷擾</option>
+            <option>不法侵害</option>
+            <option>其他敏感事件</option>
+            <option>其他</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="updateNote">處理備註<span class="optional">選填</span></label>
+          <textarea id="updateNote" rows="4" placeholder="輸入給員工或內部的備註說明…"></textarea>
+        </div>
+
+        <div id="updateAlertArea"></div>
+
+        <button class="button dark full-width" id="updateBtn" onclick="handleUpdate()" style="width:100%;">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+          儲存更新
+        </button>
+
+        <p class="field-help" style="margin-top:12px;">儲存後狀態即時更新，歷程自動記錄。</p>
+      </div>
+    </aside>
+  </div>
+
+</main>
+<footer class="footer">
+  <span><strong>路易莎咖啡</strong> &copy; 2026 HR 後台管理</span>
+</footer>
+<script>
+var BASE_URL = '<?= baseUrl ?>';
+var CASE_NUMBER = '';
+
+function handleLogout(){
+  sessionStorage.removeItem('adminToken');
+  window.location.href = BASE_URL + '?page=login';
+}
+
+var KINDS = {feedback: '意見反映', complaint: '安心申訴', human: '真人HR'};
+
+function statusClass(s){
+  if(s === '新案件') return 'new';
+  if(s === '處理中') return 'working';
+  if(s === '待員工回覆') return 'waiting';
+  if(s === '已結案') return 'closed';
+  return 'new';
+}
+
+function formatTime(v){
+  if(!v) return '—';
+  try {
+    var d = new Date(v);
+    if(isNaN(d.getTime())) return String(v);
+    return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' +
+      ('0'+d.getDate()).slice(-2) + ' ' +
+      ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+  } catch(e){ return String(v); }
+}
+
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function dt(label, value, span){
+  return '<dt>' + label + '</dt><dd class="' + (span ? 'span-two' : '') + '">' + escHtml(value || '—') + '</dd>';
+}
+
+function loadCase(){
+  var token = sessionStorage.getItem('adminToken');
+  if(!token){ window.location.href = BASE_URL + '?page=login'; return; }
+
+  google.script.run
+    .withSuccessHandler(function(result){
+      if(!result.ok){
+        if(result.error && result.error.indexOf('登入') >= 0){
+          window.location.href = BASE_URL + '?page=login'; return;
+        }
+        document.getElementById('alertArea').innerHTML = '<div class="alert error">' + escHtml(result.error) + '</div>';
+        return;
+      }
+
+      var c = result.case;
+      var history = result.history || [];
+      var kindLabel = KINDS[c.kind] || c.kind || '—';
+      var sc = statusClass(c.status);
+      var sensitive = c.sensitive === '1' || c.sensitive === 1;
+
+      // Heading
+      document.getElementById('pageTitle').textContent = c.title || '案件詳情';
+      var metaHtml = '<span class="case-number">' + escHtml(c.caseNumber) + '</span>';
+      metaHtml += ' <span class="status ' + sc + '"><span></span>' + escHtml(c.status) + '</span>';
+      if(sensitive) metaHtml += ' <span class="manual-label">人工受理</span>';
+      metaHtml += ' <span class="muted" style="font-size:11px;">' + kindLabel + '</span>';
+      document.getElementById('headingMeta').innerHTML = metaHtml;
+
+      // Details grid
+      var gridHtml = '';
+      gridHtml += dt('員工編號', c.employeeId);
+      gridHtml += dt('姓名', c.name);
+      gridHtml += dt('品牌／單位', c.organization);
+      gridHtml += dt('類別', c.category);
+      gridHtml += dt('服務類型', kindLabel);
+      gridHtml += dt('負責人員', c.assignee || '（未指派）');
+      gridHtml += dt('建立時間', formatTime(c.createdAt));
+      gridHtml += dt('最後更新', formatTime(c.updatedAt));
+      document.getElementById('detailsGrid').innerHTML = gridHtml;
+
+      // Description
+      document.getElementById('detailDesc').innerHTML = '<h3>案件說明</h3><p class="preserve-lines">' + escHtml(c.description || '') + '</p>';
+
+      // Complaint extra fields
+      var extraFields = [];
+      if(c.eventTime) extraFields.push('<strong>事件時間：</strong>' + escHtml(c.eventTime));
+      if(c.location) extraFields.push('<strong>發生地點：</strong>' + escHtml(c.location));
+      if(c.people) extraFields.push('<strong>涉及人員：</strong>' + escHtml(c.people));
+      if(c.evidence) extraFields.push('<strong>佐證：</strong>' + escHtml(c.evidence));
+      if(c.evidenceNote) extraFields.push('<strong>佐證說明：</strong>' + escHtml(c.evidenceNote));
+      if(extraFields.length > 0){
+        var extraEl = document.getElementById('complaintExtra');
+        extraEl.innerHTML = '<h3>申訴補充資訊</h3><p style="font-size:13px;line-height:2.2;">' + extraFields.join('<br>') + '</p>';
+        extraEl.hidden = false;
+      }
+
+      // Pre-fill update form
+      document.getElementById('updateStatus').value = c.status || '新案件';
+      document.getElementById('updateAssignee').value = c.assignee || '';
+
+      // Timeline
+      var tlHtml = '';
+      if(history.length === 0){
+        tlHtml = '<li><div><div><strong>（尚無歷程記錄）</strong></div></div></li>';
+      } else {
+        history.forEach(function(h){
+          tlHtml += '<li>';
+          tlHtml += '<div><strong>' + escHtml(h.actor || 'HR') + '</strong><time>' + formatTime(h.createdAt) + '</time></div>';
+          tlHtml += '<p>' + escHtml(h.action || '') + '</p>';
+          if(h.note) tlHtml += '<div class="history-note">' + escHtml(h.note) + '</div>';
+          tlHtml += '</li>';
+        });
+      }
+      document.getElementById('timelineList').innerHTML = tlHtml;
+
+      document.getElementById('detailLayout').hidden = false;
+    })
+    .withFailureHandler(function(err){
+      document.getElementById('alertArea').innerHTML = '<div class="alert error">系統錯誤：' + err.message + '</div>';
+    })
+    .getCaseDetail(token, CASE_NUMBER);
+}
+
+function handleUpdate(){
+  var token = sessionStorage.getItem('adminToken');
+  if(!token){ window.location.href = BASE_URL + '?page=login'; return; }
+
+  var updateAlertArea = document.getElementById('updateAlertArea');
+  updateAlertArea.innerHTML = '';
+  var btn = document.getElementById('updateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '儲存中…';
+
+  var updateData = {
+    status: document.getElementById('updateStatus').value,
+    assignee: document.getElementById('updateAssignee').value.trim(),
+    category: document.getElementById('updateCategory').value || '',
+    note: document.getElementById('updateNote').value.trim()
+  };
+
+  google.script.run
+    .withSuccessHandler(function(result){
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg> 儲存更新';
+      if(result.ok){
+        updateAlertArea.innerHTML = '<div class="alert success">已成功更新！</div>';
+        document.getElementById('updateNote').value = '';
+        loadCase(); // Reload to show updated data
+      } else {
+        updateAlertArea.innerHTML = '<div class="alert error">' + escHtml(result.error || '更新失敗') + '</div>';
+      }
+    })
+    .withFailureHandler(function(err){
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg> 儲存更新';
+      updateAlertArea.innerHTML = '<div class="alert error">系統錯誤：' + err.message + '</div>';
+    })
+    .updateCase(token, CASE_NUMBER, updateData);
+}
+
+(function(){
+  var token = sessionStorage.getItem('adminToken');
+  if(!token){ window.location.href = BASE_URL + '?page=login'; return; }
+
+  var urlParams = new URLSearchParams(location.search);
+  CASE_NUMBER = urlParams.get('number') || '';
+  if(!CASE_NUMBER){
+    document.getElementById('alertArea').innerHTML = '<div class="alert error">未指定案件編號</div>';
+    return;
+  }
+
+  loadCase();
+})();
+</script>
+</body>
+</html>
